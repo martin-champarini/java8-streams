@@ -1,10 +1,15 @@
 import model.Person;
+import sun.text.normalizer.UTF16;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 
 public class Main {
 
@@ -42,6 +47,9 @@ public class Main {
                 ));
         System.out.println(resultPersonMap);
 
+        System.out.println("Compress string 1: " + compressStr("112asdasd   123  ! [] {}sdaasdasdasddddddddddddasdasddddddddddddddddddddasdasdsdaasdasdasddddddddddddasdasddddddddddddddddddddasdasdsdaasdasdasddddddddddddasdasddddddddddddddddddddasdasdsdaasdasdasddddddddddddasdasddddddddddddddddddddasdasdsdaasdasdasddddddddddddasdasddddddddddddddddddddasdasdsdaasdasdasddddddddddddasdasddddddddddddddddddddasdasdsdaasdasdasddddddddddddasdasddddddddddddddddddddasdasdsdaasdasdasddddddddddddasdasddddddddddddddddddddasdasdsdaasdasdasddddddddddddasdasddddddddddddddddddddasdasdsdaasdasdasddddddddddddasdasddddddddddddddddddddasdasdsdaasdasdasddddddddddddasdasddddddddddddddddddddasdasdsdaasdasdasddddddddddddasdasddddddddddddddddddddasdasdsdaasdasdasddddddddddddasdasddddddddddddddddddddasdasdsdaasdasdasddddddddddddasdasddddddddddddddddddddasdasdsdaasdasdasddddddddddddasdasddddddddddddddddddddasdasdsdaasdasdasddddddddddddasdasdddddddddddddddddddd"));
+        System.out.println("Compress string 2: " + compressStr("1234"));
+
     }
 
     private static List<Person> getPersonList() {
@@ -62,4 +70,40 @@ public class Main {
 
         return personList;
     }
+
+    private static String compressStr(String stringToCompress) {
+        try {
+            // Encode a String into bytes
+            String inputString = stringToCompress;
+            byte[] input = inputString.getBytes("UTF-8");
+
+            // Compress the bytes
+            byte[] output = new byte[100];
+            Deflater compresser = new Deflater();
+            compresser.setInput(input);
+            compresser.finish();
+            int compressedDataLength = compresser.deflate(output);
+            System.out.println(output);
+            String output1 = new String(output);
+            System.out.println(compressedDataLength);
+            compresser.end();
+
+            // Decompress the bytes
+            Inflater decompresser = new Inflater();
+            decompresser.setInput(output1.getBytes(StandardCharsets.UTF_8), 0, compressedDataLength);
+            byte[] result = new byte[100];
+            int resultLength = decompresser.inflate(result);
+            decompresser.end();
+
+            // Decode the bytes into a String
+            String outputString = new String(result, 0, resultLength, "UTF-8");
+            return outputString;
+        } catch (java.io.UnsupportedEncodingException ex) {
+            // handle
+        } catch (java.util.zip.DataFormatException ex) {
+            // handle
+        }
+        return null;
+    }
+
 }
